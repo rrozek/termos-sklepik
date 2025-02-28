@@ -1,0 +1,62 @@
+components:
+  schemas:
+    product:
+      type: object
+      required:
+        - name
+        - price
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+          example: "123e4567-e89b-12d3-a456-426614174000"
+        name:
+          type: string
+          example: "Chocolate Bar"
+        description:
+          type: string
+          example: "Delicious milk chocolate"
+        ingredients:
+          type: string
+          example: "Cocoa, milk, sugar"
+        barcode:
+          type: string
+          example: "5901234123457"
+        image_url:
+          type: string
+          format: uri
+          example: "https://example.com/images/chocolate.jpg"
+        price:
+          type: number
+          format: float
+          example: 2.50
+        product_group_id:
+          type: string
+          format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174111"
+        is_active:
+          type: boolean
+          default: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+
+    productList:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: "Products retrieved successfully"
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/product'

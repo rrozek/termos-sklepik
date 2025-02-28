@@ -1,0 +1,244 @@
+# [GET] Get All Discounts
+/discount:
+  get:
+    tags:
+      - Discount
+    summary: Get all discounts
+    description: Retrieves all discounts in the system
+    responses:
+      200:
+        description: 'Discounts retrieved successfully'
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/discountList'
+      401:
+        description: 'Unauthorized - Authentication required'
+      500:
+        description: 'Internal server error'
+    security:
+      - bearerAuth: []
+  post:
+    tags:
+      - Discount
+    summary: Create a new discount
+    description: Creates a new discount (Admin only)
+    requestBody:
+      description: Discount information
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/discount'
+    responses:
+      201:
+        description: 'Discount created successfully'
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                  example: true
+                message:
+                  type: string
+                  example: 'Discount created successfully'
+                data:
+                  $ref: '#/components/schemas/discount'
+      400:
+        description: 'Bad Request - Invalid input parameters'
+      401:
+        description: 'Unauthorized - Authentication required'
+      403:
+        description: 'Forbidden - Admin privileges required'
+      404:
+        description: 'Target not found'
+      500:
+        description: 'Internal server error'
+    security:
+      - bearerAuth: []
+        
+# [GET] Get Active Discounts
+/discount/active:
+  get:
+    tags:
+      - Discount
+    summary: Get active discounts
+    description: Retrieves all currently active discounts considering time, date, and day constraints
+    responses:
+      200:
+        description: 'Active discounts retrieved successfully'
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/discountList'
+      401:
+        description: 'Unauthorized - Authentication required'
+      500:
+        description: 'Internal server error'
+    security:
+      - bearerAuth: []
+
+# [GET] Get Discount By ID
+/discount/{id}:
+  get:
+    tags:
+      - Discount
+    summary: Get discount by ID
+    description: Retrieves a specific discount by ID
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Discount ID
+    responses:
+      200:
+        description: 'Discount retrieved successfully'
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                  example: true
+                message:
+                  type: string
+                  example: 'Discount retrieved successfully'
+                data:
+                  $ref: '#/components/schemas/discount'
+      401:
+        description: 'Unauthorized - Authentication required'
+      404:
+        description: 'Discount not found'
+      500:
+        description: 'Internal server error'
+    security:
+      - bearerAuth: []
+  put:
+    tags:
+      - Discount
+    summary: Update a discount
+    description: Updates an existing discount (Admin only)
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Discount ID
+    requestBody:
+      description: Discount information to update
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/discount'
+    responses:
+      200:
+        description: 'Discount updated successfully'
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                  example: true
+                message:
+                  type: string
+                  example: 'Discount updated successfully'
+                data:
+                  $ref: '#/components/schemas/discount'
+      400:
+        description: 'Bad Request - Invalid input parameters'
+      401:
+        description: 'Unauthorized - Authentication required'
+      403:
+        description: 'Forbidden - Admin privileges required'
+      404:
+        description: 'Discount or target not found'
+      500:
+        description: 'Internal server error'
+    security:
+      - bearerAuth: []
+  delete:
+    tags:
+      - Discount
+    summary: Delete a discount
+    description: Deletes a discount (Admin only)
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Discount ID
+    responses:
+      200:
+        description: 'Discount deleted successfully'
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                  example: true
+                message:
+                  type: string
+                  example: 'Discount deleted successfully'
+      401:
+        description: 'Unauthorized - Authentication required'
+      403:
+        description: 'Forbidden - Admin privileges required'
+      404:
+        description: 'Discount not found'
+      500:
+        description: 'Internal server error'
+    security:
+      - bearerAuth: []
+
+# [GET] Get Discounts By Target
+/discount/target/{type}/{id}:
+  get:
+    tags:
+      - Discount
+    summary: Get discounts by target
+    description: Retrieves all discounts applicable to a specific target (product, product group, etc.)
+    parameters:
+      - name: type
+        in: path
+        required: true
+        schema:
+          type: string
+          enum: [product, product_group, order, user, kid]
+        description: Target type
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Target ID
+    responses:
+      200:
+        description: 'Discounts retrieved successfully'
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/discountList'
+      400:
+        description: 'Bad Request - Invalid target type'
+      401:
+        description: 'Unauthorized - Authentication required'
+      500:
+        description: 'Internal server error'
+    security:
+      - bearerAuth: []

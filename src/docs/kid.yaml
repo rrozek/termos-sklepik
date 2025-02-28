@@ -1,0 +1,224 @@
+# [GET] Get All Kids for Parent
+/kid:
+  get:
+    tags:
+      - Kid
+    summary: Get all kids for parent
+    description: Retrieves all kids associated with the authenticated parent
+    responses:
+      200:
+        description: 'Kids retrieved successfully'
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/kidList'
+      401:
+        description: 'Unauthorized - Authentication required'
+      500:
+        description: 'Internal server error'
+    security:
+      - bearerAuth: []
+  post:
+    tags:
+      - Kid
+    summary: Create a new kid
+    description: Creates a new kid for the authenticated parent
+    requestBody:
+      description: Kid information
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/createKid'
+    responses:
+      201:
+        description: 'Kid created successfully'
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                  example: true
+                message:
+                  type: string
+                  example: 'Kid created successfully'
+                data:
+                  $ref: '#/components/schemas/kid'
+      400:
+        description: 'Bad Request - Invalid input parameters'
+      401:
+        description: 'Unauthorized - Authentication required'
+      409:
+        description: 'Conflict - RFID token already assigned to another kid'
+      500:
+        description: 'Internal server error'
+    security:
+      - bearerAuth: []
+
+/kid/{id}:
+  get:
+    tags:
+      - Kid
+    summary: Get kid by ID
+    description: Retrieves a specific kid by ID for the authenticated parent
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Kid ID
+    responses:
+      200:
+        description: 'Kid retrieved successfully'
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                  example: true
+                message:
+                  type: string
+                  example: 'Kid retrieved successfully'
+                data:
+                  $ref: '#/components/schemas/kid'
+      401:
+        description: 'Unauthorized - Authentication required'
+      403:
+        description: 'Forbidden - Kid does not belong to this parent'
+      404:
+        description: 'Kid not found'
+      500:
+        description: 'Internal server error'
+    security:
+      - bearerAuth: []
+  put:
+    tags:
+      - Kid
+    summary: Update a kid
+    description: Updates an existing kid for the authenticated parent
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Kid ID
+    requestBody:
+      description: Kid information to update
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/createKid'
+    responses:
+      200:
+        description: 'Kid updated successfully'
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                  example: true
+                message:
+                  type: string
+                  example: 'Kid updated successfully'
+                data:
+                  $ref: '#/components/schemas/kid'
+      400:
+        description: 'Bad Request - Invalid input parameters'
+      401:
+        description: 'Unauthorized - Authentication required'
+      403:
+        description: 'Forbidden - Kid does not belong to this parent'
+      404:
+        description: 'Kid not found'
+      409:
+        description: 'Conflict - RFID token already assigned to another kid'
+      500:
+        description: 'Internal server error'
+    security:
+      - bearerAuth: []
+  delete:
+    tags:
+      - Kid
+    summary: Delete a kid
+    description: Deletes or deactivates a kid (deactivates if kid has order history)
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Kid ID
+    responses:
+      200:
+        description: 'Kid deleted successfully'
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                  example: true
+                message:
+                  type: string
+                  example: 'Kid deleted successfully'
+      401:
+        description: 'Unauthorized - Authentication required'
+      403:
+        description: 'Forbidden - Kid does not belong to this parent'
+      404:
+        description: 'Kid not found'
+      500:
+        description: 'Internal server error'
+    security:
+      - bearerAuth: []
+
+# [GET] Get Kid By RFID
+/kid/rfid/{token}:
+  get:
+    tags:
+      - Kid
+    summary: Get kid by RFID token
+    description: Retrieves a kid by their RFID token (primarily for kiosk authentication)
+    parameters:
+      - name: token
+        in: path
+        required: true
+        schema:
+          type: string
+        description: RFID token
+    responses:
+      200:
+        description: 'Kid retrieved successfully'
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                  example: true
+                message:
+                  type: string
+                  example: 'Kid retrieved successfully'
+                data:
+                  $ref: '#/components/schemas/kid'
+      404:
+        description: 'Kid not found with this RFID token'
+      500:
+        description: 'Internal server error'
+    security:
+      - bearerAuth: []
+

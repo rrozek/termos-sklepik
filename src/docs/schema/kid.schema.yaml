@@ -1,0 +1,72 @@
+components:
+  schemas:
+    kid:
+      type: object
+      required:
+        - name
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+          example: "123e4567-e89b-12d3-a456-426614174222"
+        name:
+          type: string
+          example: "John Jr."
+        parent_id:
+          type: string
+          format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174000"
+          readOnly: true
+        rfid_token:
+          type: array
+          items:
+            type: string
+          example: ["ABC123456", "DEF789012"]
+        monthly_spending_limit:
+          type: number
+          format: float
+          example: 50.00
+        is_active:
+          type: boolean
+          default: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+
+    kidList:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: "Kids retrieved successfully"
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/kid'
+
+    createKid:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          example: "John Jr."
+        rfid_token:
+          type: array
+          items:
+            type: string
+          example: ["ABC123456", "DEF789012"]
+        monthly_spending_limit:
+          type: number
+          format: float
+          example: 50.00

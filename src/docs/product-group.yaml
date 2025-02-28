@@ -1,0 +1,190 @@
+# [GET] Get All Product Groups
+/product-group:
+  get:
+    tags:
+      - Product Group
+    summary: Get all product groups
+    description: Retrieves all product groups available in the system
+    responses:
+      200:
+        description: 'Product groups retrieved successfully'
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/productGroupList'
+      401:
+        description: 'Unauthorized - Authentication required'
+      500:
+        description: 'Internal server error'
+    security:
+      - bearerAuth: []
+  post:
+    tags:
+      - Product Group
+    summary: Create a new product group
+    description: Creates a new product group (Admin only)
+    requestBody:
+      description: Product group information
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/productGroup'
+    responses:
+      201:
+        description: 'Product group created successfully'
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                  example: true
+                message:
+                  type: string
+                  example: 'Product group created successfully'
+                data:
+                  $ref: '#/components/schemas/productGroup'
+      400:
+        description: 'Bad Request - Invalid input parameters'
+      401:
+        description: 'Unauthorized - Authentication required'
+      403:
+        description: 'Forbidden - Admin privileges required'
+      409:
+        description: 'Conflict - Product group with same name already exists'
+      500:
+        description: 'Internal server error'
+    security:
+      - bearerAuth: []
+
+
+/product-group/{id}:
+  get:
+    tags:
+      - Product Group
+    summary: Get product group by ID
+    description: Retrieves a specific product group by ID
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Product Group ID
+    responses:
+      200:
+        description: 'Product group retrieved successfully'
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                  example: true
+                message:
+                  type: string
+                  example: 'Product group retrieved successfully'
+                data:
+                  $ref: '#/components/schemas/productGroup'
+      401:
+        description: 'Unauthorized - Authentication required'
+      404:
+        description: 'Product group not found'
+      500:
+        description: 'Internal server error'
+    security:
+      - bearerAuth: []
+  put:
+    tags:
+      - Product Group
+    summary: Update a product group
+    description: Updates an existing product group (Admin only)
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Product Group ID
+    requestBody:
+      description: Product group information to update
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/productGroup'
+    responses:
+      200:
+        description: 'Product group updated successfully'
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                  example: true
+                message:
+                  type: string
+                  example: 'Product group updated successfully'
+                data:
+                  $ref: '#/components/schemas/productGroup'
+      400:
+        description: 'Bad Request - Invalid input parameters'
+      401:
+        description: 'Unauthorized - Authentication required'
+      403:
+        description: 'Forbidden - Admin privileges required'
+      404:
+        description: 'Product group not found'
+      409:
+        description: 'Conflict - Product group with same name already exists'
+      500:
+        description: 'Internal server error'
+    security:
+      - bearerAuth: []
+
+  delete:
+    tags:
+      - Product Group
+    summary: Delete a product group
+    description: Deletes a product group if it has no associated products (Admin only)
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Product Group ID
+    responses:
+      200:
+        description: 'Product group deleted successfully'
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                  example: true
+                message:
+                  type: string
+                  example: 'Product group deleted successfully'
+      400:
+        description: 'Bad Request - Product group has associated products'
+      401:
+        description: 'Unauthorized - Authentication required'
+      403:
+        description: 'Forbidden - Admin privileges required'
+      404:
+        description: 'Product group not found'
+      500:
+        description: 'Internal server error'
+    security:
+      - bearerAuth: []

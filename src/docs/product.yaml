@@ -1,0 +1,255 @@
+# [GET] Get All Products
+/product:
+  get:
+    tags:
+      - Product
+    summary: Get all products
+    description: Retrieves all products available in the system
+    responses:
+      200:
+        description: 'Products retrieved successfully'
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/productList'
+      401:
+        description: 'Unauthorized - Authentication required'
+      500:
+        description: 'Internal server error'
+    security:
+      - bearerAuth: []
+  post:
+    tags:
+      - Product
+    summary: Create a new product
+    description: Creates a new product (Admin only)
+    requestBody:
+      description: Product information
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/product'
+    responses:
+      201:
+        description: 'Product created successfully'
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                  example: true
+                message:
+                  type: string
+                  example: 'Product created successfully'
+                data:
+                  $ref: '#/components/schemas/product'
+      400:
+        description: 'Bad Request - Invalid input parameters'
+      401:
+        description: 'Unauthorized - Authentication required'
+      403:
+        description: 'Forbidden - Admin privileges required'
+      409:
+        description: 'Conflict - Barcode already in use'
+      500:
+        description: 'Internal server error'
+    security:
+      - bearerAuth: []
+
+/product/{id}:
+  get:
+    tags:
+      - Product
+    summary: Get product by ID
+    description: Retrieves a specific product by ID
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Product ID
+    responses:
+      200:
+        description: 'Product retrieved successfully'
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                  example: true
+                message:
+                  type: string
+                  example: 'Product retrieved successfully'
+                data:
+                  $ref: '#/components/schemas/product'
+      401:
+        description: 'Unauthorized - Authentication required'
+      404:
+        description: 'Product not found'
+      500:
+        description: 'Internal server error'
+    security:
+      - bearerAuth: []
+  put:
+    tags:
+      - Product
+    summary: Update a product
+    description: Updates an existing product (Admin only)
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Product ID
+    requestBody:
+      description: Product information to update
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/product'
+    responses:
+      200:
+        description: 'Product updated successfully'
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                  example: true
+                message:
+                  type: string
+                  example: 'Product updated successfully'
+                data:
+                  $ref: '#/components/schemas/product'
+      400:
+        description: 'Bad Request - Invalid input parameters'
+      401:
+        description: 'Unauthorized - Authentication required'
+      403:
+        description: 'Forbidden - Admin privileges required'
+      404:
+        description: 'Product not found'
+      409:
+        description: 'Conflict - Barcode already in use'
+      500:
+        description: 'Internal server error'
+    security:
+      - bearerAuth: []
+  delete:
+    tags:
+      - Product
+    summary: Delete a product
+    description: Deletes or deactivates a product (Admin only)
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Product ID
+    responses:
+      200:
+        description: 'Product deleted successfully'
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                  example: true
+                message:
+                  type: string
+                  example: 'Product deleted successfully'
+      401:
+        description: 'Unauthorized - Authentication required'
+      403:
+        description: 'Forbidden - Admin privileges required'
+      404:
+        description: 'Product not found'
+      500:
+        description: 'Internal server error'
+    security:
+      - bearerAuth: []
+
+/product/group/{groupId}:
+  get:
+    tags:
+      - Product
+    summary: Get products by group
+    description: Retrieves all products belonging to a specific product group
+    parameters:
+      - name: groupId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Product Group ID
+    responses:
+      200:
+        description: 'Products retrieved successfully'
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/productList'
+      401:
+        description: 'Unauthorized - Authentication required'
+      404:
+        description: 'Product group not found'
+      500:
+        description: 'Internal server error'
+    security:
+      - bearerAuth: []
+
+# [GET] Get Product By Barcode
+/product/barcode/{barcode}:
+  get:
+    tags:
+      - Product
+    summary: Get product by barcode
+    description: Retrieves a product by its barcode
+    parameters:
+      - name: barcode
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Product barcode
+    responses:
+      200:
+        description: 'Product retrieved successfully'
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                  example: true
+                message:
+                  type: string
+                  example: 'Product retrieved successfully'
+                data:
+                  $ref: '#/components/schemas/product'
+      401:
+        description: 'Unauthorized - Authentication required'
+      404:
+        description: 'Product not found with this barcode'
+      500:
+        description: 'Internal server error'
+    security:
+      - bearerAuth: []

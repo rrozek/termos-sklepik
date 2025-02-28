@@ -1,0 +1,127 @@
+components:
+  schemas:
+    order:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+          example: "123e4567-e89b-12d3-a456-426614174444"
+        kid_id:
+          type: string
+          format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174222"
+        parent_id:
+          type: string
+          format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174000"
+          readOnly: true
+        total_amount:
+          type: number
+          format: float
+          example: 12.50
+          readOnly: true
+        status:
+          type: string
+          enum: [pending, completed, canceled]
+          default: "pending"
+          example: "completed"
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        order_items:
+          type: array
+          items:
+            $ref: '#/components/schemas/orderItem'
+
+    orderItem:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+          example: "123e4567-e89b-12d3-a456-426614174555"
+        order_id:
+          type: string
+          format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174444"
+          readOnly: true
+        product_id:
+          type: string
+          format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174000"
+        product_name:
+          type: string
+          example: "Chocolate Bar"
+          readOnly: true
+        quantity:
+          type: integer
+          example: 2
+        unit_price:
+          type: number
+          format: float
+          example: 2.50
+          readOnly: true
+        total_price:
+          type: number
+          format: float
+          example: 5.00
+          readOnly: true
+        discount_applied:
+          type: number
+          format: float
+          example: 0.50
+          readOnly: true
+
+    createOrder:
+      type: object
+      required:
+        - kid_id
+        - items
+      properties:
+        kid_id:
+          type: string
+          format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174222"
+        items:
+          type: array
+          items:
+            type: object
+            required:
+              - product_id
+              - quantity
+            properties:
+              product_id:
+                type: string
+                format: uuid
+                example: "123e4567-e89b-12d3-a456-426614174000"
+              quantity:
+                type: integer
+                example: 2
+
+    orderList:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: "Orders retrieved successfully"
+        data:
+          type: object
+          properties:
+            orders:
+              type: array
+              items:
+                $ref: '#/components/schemas/order'
+            total:
+              type: integer
+              example: 10

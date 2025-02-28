@@ -1,0 +1,64 @@
+components:
+  schemas:
+    user:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+          example: "123e4567-e89b-12d3-a456-426614174000"
+        email:
+          type: string
+          format: email
+          example: "john.doe@example.com"
+        name:
+          type: string
+          example: "John Doe"
+        role:
+          type: string
+          enum: [admin, parent, staff]
+          example: "parent"
+          readOnly: true
+        portal_user_id:
+          type: integer
+          example: 12345
+          readOnly: true
+        is_active:
+          type: boolean
+          default: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        kids:
+          type: array
+          items:
+            $ref: '#/components/schemas/kid'
+
+    userProfile:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: "User profile retrieved successfully"
+        data:
+          $ref: '#/components/schemas/user'
+
+    updateUserProfile:
+      type: object
+      properties:
+        name:
+          type: string
+          example: "John Doe"
+        email:
+          type: string
+          format: email
+          example: "john.doe@example.com"

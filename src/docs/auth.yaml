@@ -1,0 +1,136 @@
+# [POST] signup
+/auth/signup:
+  post:
+    tags:
+      - Auth
+    summary: Register a new user
+    description: Create a new user account with the provided information
+    requestBody:
+      description: User registration information
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/signup'
+    responses:
+      201:
+        description: 'User registered successfully'
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                  example: true
+                message:
+                  type: string
+                  example: 'User registered successfully'
+                data:
+                  $ref: '#/components/schemas/user'
+      400:
+        description: 'Bad Request - Invalid input parameters'
+      409:
+        description: 'Conflict - Email already exists'
+      500:
+        description: 'Internal server error'
+
+# [POST] signin
+/auth/signin:
+  post:
+    tags:
+      - Auth
+    summary: Authenticate user
+    description: Authenticate a user with email and password
+    requestBody:
+      description: User credentials
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/signin'
+    responses:
+      200:
+        description: 'User authenticated successfully'
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/authResponse'
+      400:
+        description: 'Bad Request - Invalid input parameters'
+      401:
+        description: 'Unauthorized - Invalid credentials'
+      500:
+        description: 'Internal server error'
+
+# [POST] refresh token
+/auth/refresh:
+  post:
+    tags:
+      - Auth
+    summary: Refresh authentication tokens
+    description: Get new access and refresh tokens using a valid refresh token
+    requestBody:
+      description: Refresh token
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/refreshToken'
+    responses:
+      200:
+        description: 'Token refreshed successfully'
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                  example: true
+                message:
+                  type: string
+                  example: 'Token refreshed successfully'
+                data:
+                  type: object
+                  properties:
+                    accessToken:
+                      type: string
+                      example: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                    refreshToken:
+                      type: string
+                      example: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+      400:
+        description: 'Bad Request - Invalid refresh token format'
+      401:
+        description: 'Unauthorized - Invalid refresh token'
+      500:
+        description: 'Internal server error'
+
+# [POST] verify Django token
+/auth/verify-django-token:
+  post:
+    tags:
+      - Auth
+    summary: Verify Django JWT token
+    description: Verify a token from Django application and create a session in this application
+    requestBody:
+      description: Django JWT token
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/verifyDjangoToken'
+    responses:
+      200:
+        description: 'Django token verified successfully'
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/authResponse'
+      400:
+        description: 'Bad Request - Invalid token format'
+      401:
+        description: 'Unauthorized - Invalid Django token'
+      500:
+        description: 'Internal server error'

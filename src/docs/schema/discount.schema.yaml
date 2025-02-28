@@ -1,0 +1,117 @@
+components:
+  schemas:
+    discount:
+      type: object
+      required:
+        - name
+        - discount_type
+        - discount_value
+        - target_type
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+          example: "123e4567-e89b-12d3-a456-426614174333"
+        name:
+          type: string
+          example: "Summer Sale"
+        description:
+          type: string
+          example: "Special discount for summer items"
+        discount_type:
+          type: string
+          enum: [percentage, fixed_amount, buy_x_get_y, bundle]
+          example: "percentage"
+        discount_value:
+          type: number
+          format: float
+          example: 10.00
+        target_type:
+          type: string
+          enum: [product, product_group, order, user, kid]
+          example: "product_group"
+        target_id:
+          type: string
+          format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174111"
+        start_date:
+          type: string
+          format: date
+          example: "2025-06-01"
+        end_date:
+          type: string
+          format: date
+          example: "2025-08-31"
+        start_time:
+          type: string
+          example: "14:00"
+        end_time:
+          type: string
+          example: "23:59"
+        monday_enabled:
+          type: boolean
+          default: true
+        tuesday_enabled:
+          type: boolean
+          default: true
+        wednesday_enabled:
+          type: boolean
+          default: true
+        thursday_enabled:
+          type: boolean
+          default: true
+        friday_enabled:
+          type: boolean
+          default: true
+        saturday_enabled:
+          type: boolean
+          default: true
+        sunday_enabled:
+          type: boolean
+          default: true
+        minimum_purchase_amount:
+          type: number
+          format: float
+          example: 20.00
+        minimum_quantity:
+          type: integer
+          example: 2
+        buy_quantity:
+          type: integer
+          example: 2
+        get_quantity:
+          type: integer
+          example: 1
+        is_stackable:
+          type: boolean
+          default: false
+        priority:
+          type: integer
+          default: 0
+          example: 10
+        is_active:
+          type: boolean
+          default: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+
+    discountList:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: "Discounts retrieved successfully"
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/discount'

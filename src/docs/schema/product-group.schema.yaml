@@ -1,0 +1,43 @@
+components:
+  schemas:
+    productGroup:
+      type: object
+      required:
+        - name
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+          example: "123e4567-e89b-12d3-a456-426614174111"
+        name:
+          type: string
+          example: "Snacks"
+        description:
+          type: string
+          example: "Snack items available in the kiosk"
+        is_active:
+          type: boolean
+          default: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+
+    productGroupList:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: "Product groups retrieved successfully"
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/productGroup'
