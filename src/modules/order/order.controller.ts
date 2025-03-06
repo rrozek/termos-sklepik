@@ -1,3 +1,5 @@
+// modules/order/order.controller.ts
+
 import { NextFunction, Request, Response } from 'express';
 import {
   createOrderService,
@@ -5,33 +7,31 @@ import {
   getKidOrdersService,
   getOrderByIdService,
   getParentOrdersService,
+  getOrderStatisticsService,
+  updateOrderStatusService,
+  cancelOrderService,
 } from './order.service';
 
+/**
+ * Get all orders (admin/staff only)
+ */
 export const getAllOrdersController = async (
   req: Request,
   res: Response,
   next: NextFunction,
 ): Promise<void> => {
   try {
-    const { page = '1', limit = '10', startDate, endDate } = req.query;
-
-    const orders = await getAllOrdersService({
-      page: parseInt(page as string, 10),
-      limit: parseInt(limit as string, 10),
-      startDate: startDate as string,
-      endDate: endDate as string,
-    });
-
-    res.status(200).json({
-      success: true,
-      message: 'Orders retrieved successfully',
-      data: orders,
-    });
+    // Pass all query parameters to the service
+    const result = await getAllOrdersService(req.query);
+    res.status(200).json(result);
   } catch (error) {
     next(error);
   }
 };
 
+/**
+ * Get orders for authenticated parent
+ */
 export const getParentOrdersController = async (
   req: Request,
   res: Response,
@@ -39,25 +39,17 @@ export const getParentOrdersController = async (
 ): Promise<void> => {
   try {
     const parentId = req.context?.userId;
-    const { page = '1', limit = '10', startDate, endDate } = req.query;
-
-    const orders = await getParentOrdersService(parentId, {
-      page: parseInt(page as string, 10),
-      limit: parseInt(limit as string, 10),
-      startDate: startDate as string,
-      endDate: endDate as string,
-    });
-
-    res.status(200).json({
-      success: true,
-      message: 'Orders retrieved successfully',
-      data: orders,
-    });
+    // Pass all query parameters to the service
+    const result = await getParentOrdersService(parentId, req.query);
+    res.status(200).json(result);
   } catch (error) {
     next(error);
   }
 };
 
+/**
+ * Get orders for a specific kid
+ */
 export const getKidOrdersController = async (
   req: Request,
   res: Response,
@@ -66,25 +58,17 @@ export const getKidOrdersController = async (
   try {
     const parentId = req.context?.userId;
     const { kidId } = req.params;
-    const { page = '1', limit = '10', startDate, endDate } = req.query;
-
-    const orders = await getKidOrdersService(kidId, parentId, {
-      page: parseInt(page as string, 10),
-      limit: parseInt(limit as string, 10),
-      startDate: startDate as string,
-      endDate: endDate as string,
-    });
-
-    res.status(200).json({
-      success: true,
-      message: 'Orders retrieved successfully',
-      data: orders,
-    });
+    // Pass all query parameters to the service
+    const result = await getKidOrdersService(kidId, parentId, req.query);
+    res.status(200).json(result);
   } catch (error) {
     next(error);
   }
 };
 
+/**
+ * Get an order by ID
+ */
 export const getOrderByIdController = async (
   req: Request,
   res: Response,
@@ -93,18 +77,40 @@ export const getOrderByIdController = async (
   try {
     const { id } = req.params;
     const userId = req.context?.userId;
-    const order = await getOrderByIdService(id, userId);
-
-    res.status(200).json({
-      success: true,
-      message: 'Order retrieved successfully',
-      data: order,
-    });
+    const result = await getOrderByIdService(id, userId);
+    res.status(200).json(result);
   } catch (error) {
     next(error);
   }
 };
 
+/**
+ * Get order statistics
+ */
+export const getOrderStatisticsController = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> => {
+  try {
+    const userId = req.context?.userId;
+    const { kidId, startDate, endDate } = req.query;
+
+    const result = await getOrderStatisticsService(
+      userId,
+      kidId as string,
+      startDate as string,
+      endDate as string,
+    );
+    res.status(200).json(result);
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * Create a new order
+ */
 export const createOrderController = async (
   req: Request,
   res: Response,
@@ -113,14 +119,50 @@ export const createOrderController = async (
   try {
     const orderData = req.body;
     const userId = req.context?.userId;
+    const result = await createOrderService(orderData, userId);
+    res.status(201).json(result);
+  } catch (error) {
+    next(error);
+  }
+};
 
-    const newOrder = await createOrderService(orderData, userId);
+/**
+ * Update order status
+ */
+export const updateOrderStatusController = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+    const userId = req.context?.userId;
 
-    res.status(201).json({
-      success: true,
-      message: 'Order created successfully',
-      data: newOrder,
-    });
+    if (!status) {
+      throw new Error('Status is required');
+    }
+
+    const result = await updateOrderStatusService(id, status, userId);
+    res.status(200).json(result);
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * Cancel an order
+ */
+export const cancelOrderController = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> => {
+  try {
+    const { id } = req.params;
+    const userId = req.context?.userId;
+    const result = await cancelOrderService(id, userId);
+    res.status(200).json(result);
   } catch (error) {
     next(error);
   }

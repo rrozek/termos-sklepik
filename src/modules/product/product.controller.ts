@@ -1,3 +1,5 @@
+// modules/product/product.controller.ts
+
 import { NextFunction, Request, Response } from 'express';
 import {
   createProductService,
@@ -9,24 +11,26 @@ import {
   updateProductService,
 } from './product.service';
 
+/**
+ * Get all products with filtering and pagination
+ */
 export const getAllProductsController = async (
   req: Request,
   res: Response,
   next: NextFunction,
 ): Promise<void> => {
   try {
-    const products = await getAllProductsService();
-
-    res.status(200).json({
-      success: true,
-      message: 'Products retrieved successfully',
-      data: products,
-    });
+    // Pass all query parameters to the service
+    const result = await getAllProductsService(req.query);
+    res.status(200).json(result);
   } catch (error) {
     next(error);
   }
 };
 
+/**
+ * Get a product by ID
+ */
 export const getProductByIdController = async (
   req: Request,
   res: Response,
@@ -34,18 +38,16 @@ export const getProductByIdController = async (
 ): Promise<void> => {
   try {
     const { id } = req.params;
-    const product = await getProductByIdService(id);
-
-    res.status(200).json({
-      success: true,
-      message: 'Product retrieved successfully',
-      data: product,
-    });
+    const result = await getProductByIdService(id);
+    res.status(200).json(result);
   } catch (error) {
     next(error);
   }
 };
 
+/**
+ * Get products by group ID with filtering and pagination
+ */
 export const getProductsByGroupController = async (
   req: Request,
   res: Response,
@@ -53,18 +55,17 @@ export const getProductsByGroupController = async (
 ): Promise<void> => {
   try {
     const { groupId } = req.params;
-    const products = await getProductsByGroupService(groupId);
-
-    res.status(200).json({
-      success: true,
-      message: 'Products retrieved successfully',
-      data: products,
-    });
+    // Pass all query parameters to the service
+    const result = await getProductsByGroupService(groupId, req.query);
+    res.status(200).json(result);
   } catch (error) {
     next(error);
   }
 };
 
+/**
+ * Get a product by barcode
+ */
 export const getProductByBarcodeController = async (
   req: Request,
   res: Response,
@@ -72,18 +73,16 @@ export const getProductByBarcodeController = async (
 ): Promise<void> => {
   try {
     const { barcode } = req.params;
-    const product = await getProductByBarcodeService(barcode);
-
-    res.status(200).json({
-      success: true,
-      message: 'Product retrieved successfully',
-      data: product,
-    });
+    const result = await getProductByBarcodeService(barcode);
+    res.status(200).json(result);
   } catch (error) {
     next(error);
   }
 };
 
+/**
+ * Create a new product
+ */
 export const createProductController = async (
   req: Request,
   res: Response,
@@ -91,18 +90,16 @@ export const createProductController = async (
 ): Promise<void> => {
   try {
     const productData = req.body;
-    const newProduct = await createProductService(productData);
-
-    res.status(201).json({
-      success: true,
-      message: 'Product created successfully',
-      data: newProduct,
-    });
+    const result = await createProductService(productData);
+    res.status(201).json(result);
   } catch (error) {
     next(error);
   }
 };
 
+/**
+ * Update an existing product
+ */
 export const updateProductController = async (
   req: Request,
   res: Response,
@@ -111,19 +108,16 @@ export const updateProductController = async (
   try {
     const { id } = req.params;
     const productData = req.body;
-
-    const updatedProduct = await updateProductService(id, productData);
-
-    res.status(200).json({
-      success: true,
-      message: 'Product updated successfully',
-      data: updatedProduct,
-    });
+    const result = await updateProductService(id, productData);
+    res.status(200).json(result);
   } catch (error) {
     next(error);
   }
 };
 
+/**
+ * Delete or deactivate a product
+ */
 export const deleteProductController = async (
   req: Request,
   res: Response,
@@ -131,13 +125,8 @@ export const deleteProductController = async (
 ): Promise<void> => {
   try {
     const { id } = req.params;
-
-    await deleteProductService(id);
-
-    res.status(200).json({
-      success: true,
-      message: 'Product deleted successfully',
-    });
+    const result = await deleteProductService(id);
+    res.status(200).json(result);
   } catch (error) {
     next(error);
   }

@@ -40,7 +40,32 @@ export const validateKid = (kidData: Partial<Kid>, isUpdate = false) => {
     is_active: Joi.boolean().optional(),
     created_at: Joi.date().optional(),
     updated_at: Joi.date().optional(),
+    // Virtual fields - not persisted to the DB directly
+    schools: Joi.array().optional(),
+    parent: Joi.object().optional(),
   });
 
   return schema.validate(kidData, options);
+};
+
+export const validateKidWithSchools = (data: any, isUpdate = false) => {
+  const kidSchema = validateKid(data, isUpdate);
+
+  const schoolIdsSchema = Joi.object({
+    schoolIds: Joi.array().items(
+      Joi.string().uuid().messages({
+        'string.guid': 'School ID must be in UUID format',
+      })
+    ).optional(),
+  });
+
+  const { error: schoolError } = schoolIdsSchema.validate(
+    { schoolIds: data.schoolIds },
+    options
+  );
+
+  if (kidSchema.error) return kidSchema;
+  if (schoolError) return { error: schoolError };
+
+  return { value: data };
 };

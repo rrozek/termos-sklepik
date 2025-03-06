@@ -6,7 +6,7 @@ import {
   getProductGroupByIdController,
   updateProductGroupController,
 } from './product-group.controller';
-import { adminMiddleware } from '@/middlewares/admin.middleware';
+import { adminMiddleware } from '@/middlewares/auth.middleware';
 
 const productGroupRouter = express.Router();
 

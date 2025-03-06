@@ -8,7 +8,7 @@ import {
   getProductsByGroupController,
   updateProductController,
 } from './product.controller';
-import { adminMiddleware } from '@/middlewares/admin.middleware';
+import { adminMiddleware } from '@/middlewares/auth.middleware';
 
 const productRouter = express.Router();
 

@@ -182,7 +182,7 @@ const discountRepo = {
     discountId: string,
     discountData: Partial<Discount>,
   ): Promise<Discount> => {
-    const [_, updatedDiscounts] = await DB.Discounts.update(discountData, {
+    const [, updatedDiscounts] = await DB.Discounts.update(discountData, {
       where: { id: discountId },
       returning: true,
     });

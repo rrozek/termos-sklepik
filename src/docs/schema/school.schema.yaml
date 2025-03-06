@@ -1,0 +1,191 @@
+components:
+  schemas:
+    school:
+      type: object
+      required:
+        - name
+        - monday_enabled
+        - tuesday_enabled
+        - wednesday_enabled
+        - thursday_enabled
+        - friday_enabled
+        - saturday_enabled
+        - sunday_enabled
+        - is_active
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+          example: "123e4567-e89b-12d3-a456-426614174333"
+        name:
+          type: string
+          example: "Primary School No. 1"
+        address:
+          type: string
+          example: "123 Education St."
+        city:
+          type: string
+          example: "Warsaw"
+        postal_code:
+          type: string
+          example: "00-001"
+        contact_email:
+          type: string
+          format: email
+          example: "contact@school1.edu"
+        contact_phone:
+          type: string
+          example: "+48123456789"
+        opening_hour:
+          type: string
+          example: "08:00"
+        closing_hour:
+          type: string
+          example: "16:00"
+        monday_enabled:
+          type: boolean
+          default: true
+        tuesday_enabled:
+          type: boolean
+          default: true
+        wednesday_enabled:
+          type: boolean
+          default: true
+        thursday_enabled:
+          type: boolean
+          default: true
+        friday_enabled:
+          type: boolean
+          default: true
+        saturday_enabled:
+          type: boolean
+          default: false
+        sunday_enabled:
+          type: boolean
+          default: false
+        is_active:
+          type: boolean
+          default: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+
+    schoolList:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: "Schools retrieved successfully"
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/school'
+
+    createSchool:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          example: "Primary School No. 1"
+        address:
+          type: string
+          example: "123 Education St."
+        city:
+          type: string
+          example: "Warsaw"
+        postal_code:
+          type: string
+          example: "00-001"
+        contact_email:
+          type: string
+          format: email
+          example: "contact@school1.edu"
+        contact_phone:
+          type: string
+          example: "+48123456789"
+        opening_hour:
+          type: string
+          example: "08:00"
+        closing_hour:
+          type: string
+          example: "16:00"
+        monday_enabled:
+          type: boolean
+          default: true
+        tuesday_enabled:
+          type: boolean
+          default: true
+        wednesday_enabled:
+          type: boolean
+          default: true
+        thursday_enabled:
+          type: boolean
+          default: true
+        friday_enabled:
+          type: boolean
+          default: true
+        saturday_enabled:
+          type: boolean
+          default: false
+        sunday_enabled:
+          type: boolean
+          default: false
+        is_active:
+          type: boolean
+          default: true
+
+    updateSchool:
+      type: object
+      properties:
+        name:
+          type: string
+          example: "Primary School No. 1"
+        address:
+          type: string
+          example: "123 Education St."
+        city:
+          type: string
+          example: "Warsaw"
+        postal_code:
+          type: string
+          example: "00-001"
+        contact_email:
+          type: string
+          format: email
+          example: "contact@school1.edu"
+        contact_phone:
+          type: string
+          example: "+48123456789"
+        opening_hour:
+          type: string
+          example: "08:00"
+        closing_hour:
+          type: string
+          example: "16:00"
+        monday_enabled:
+          type: boolean
+        tuesday_enabled:
+          type: boolean
+        wednesday_enabled:
+          type: boolean
+        thursday_enabled:
+          type: boolean
+        friday_enabled:
+          type: boolean
+        saturday_enabled:
+          type: boolean
+        sunday_enabled:
+          type: boolean
+        is_active:
+          type: boolean

@@ -1,3 +1,5 @@
+// server.ts
+
 import express from 'express';
 import cors from 'cors';
 import router from '@routes/routes';
@@ -6,6 +8,7 @@ import { DB } from '@database/index';
 import { PORT } from './config';
 import { errorHandler } from './utils/error-handler';
 import { swaggerSpec, swaggerUi } from './utils/swagger';
+import { standardizeResponse } from './middlewares/response.middleware';
 
 const appServer = express();
 const port = PORT;
@@ -42,6 +45,9 @@ appServer.options('*', cors(corsOptions));
 appServer.use(express.json());
 appServer.use(express.urlencoded({ extended: true }));
 
+// Apply response standardization middleware
+appServer.use(standardizeResponse());
+
 appServer.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // Use the router with the /api prefix
@@ -49,7 +55,11 @@ appServer.use('/api', router);
 appServer.use(errorHandler);
 
 appServer.all('*', (req, res) => {
-  res.status(404).json({ message: 'Sorry! Page not found' });
+  res.status(404).json({
+    success: false,
+    message: 'Sorry! Page not found',
+    data: [],
+  });
 });
 
 DB.sequelize

@@ -13,6 +13,7 @@ export const getUserProfileService = async (userId: string) => {
   }
 
   // Don't return the password in the response
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { password, ...userWithoutPassword } = user.get({ plain: true });
 
   return userWithoutPassword;

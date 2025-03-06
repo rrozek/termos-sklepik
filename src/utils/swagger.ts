@@ -11,14 +11,14 @@ const options = {
       description: 'API documentation for the Sklepik vending machine system',
       contact: {
         name: 'API Support',
-        email: 'support@example.com'
-      }
+        email: 'support@example.com',
+      },
     },
     servers: [
       {
         url: `${BASE_URL}/api`,
-        description: 'Development server'
-      }
+        description: 'Development server',
+      },
     ],
     components: {
       securitySchemes: {
@@ -37,38 +37,35 @@ const options = {
     tags: [
       {
         name: 'Auth',
-        description: 'Authentication operations'
+        description: 'Authentication operations',
       },
       {
         name: 'User',
-        description: 'User profile operations'
+        description: 'User profile operations',
       },
       {
         name: 'Kid',
-        description: 'Kid management operations'
+        description: 'Kid management operations',
       },
       {
         name: 'Product',
-        description: 'Product management operations'
+        description: 'Product management operations',
       },
       {
         name: 'Product Group',
-        description: 'Product group management operations'
+        description: 'Product group management operations',
       },
       {
         name: 'Discount',
-        description: 'Discount management operations'
+        description: 'Discount management operations',
       },
       {
         name: 'Order',
-        description: 'Order management operations'
-      }
-    ]
+        description: 'Order management operations',
+      },
+    ],
   },
-  apis: [
-    './src/docs/*.yaml',
-    './src/docs/schema/*.yaml'
-  ],
+  apis: ['./src/docs/*.yaml', './src/docs/schema/*.yaml'],
 };
 
 const swaggerSpec = swaggerJSDoc(options);

@@ -7,6 +7,8 @@ import productModel from './models/product.model';
 import orderModel from './models/order.model';
 import orderItemModel from './models/order-item.model';
 import discountModel from './models/discount.model';
+import schoolModel from './models/school.model';
+import kidSchoolModel from './models/kid-school.model';
 import {
   DB_DIALECT,
   DB_HOST,
@@ -54,6 +56,8 @@ const Products = productModel(sequelize);
 const Orders = orderModel(sequelize);
 const OrderItems = orderItemModel(sequelize);
 const Discounts = discountModel(sequelize);
+const Schools = schoolModel(sequelize);
+const KidSchools = kidSchoolModel(sequelize);
 
 // Define associations
 Users.hasMany(Kids, { foreignKey: 'parent_id', as: 'kids' });
@@ -80,6 +84,20 @@ OrderItems.belongsTo(Orders, { foreignKey: 'order_id', as: 'order' });
 Products.hasMany(OrderItems, { foreignKey: 'product_id', as: 'order_items' });
 OrderItems.belongsTo(Products, { foreignKey: 'product_id', as: 'product' });
 
+// School associations
+Kids.belongsToMany(Schools, {
+  through: KidSchools,
+  foreignKey: 'kid_id',
+  otherKey: 'school_id',
+  as: 'schools',
+});
+Schools.belongsToMany(Kids, {
+  through: KidSchools,
+  foreignKey: 'school_id',
+  otherKey: 'kid_id',
+  as: 'kids',
+});
+
 export const DB = {
   Users,
   Kids,
@@ -88,6 +106,8 @@ export const DB = {
   Orders,
   OrderItems,
   Discounts,
+  Schools,
+  KidSchools,
   sequelize, // connection instance (RAW queries)
   Sequelize, // library
 };

@@ -25,7 +25,8 @@ export const JWT_ACCESS_TOKEN_SECRET =
 export const JWT_REFRESH_TOKEN_SECRET =
   process.env.JWT_REFRESH_TOKEN_SECRET || 'refresh_token_secret';
 export const JWT_EXPIRATION = process.env.JWT_EXPIRATION || '1d';
-export const JWT_REFRESH_EXPIRATION = process.env.JWT_REFRESH_EXPIRATION || '7d';
+export const JWT_REFRESH_EXPIRATION =
+  process.env.JWT_REFRESH_EXPIRATION || '7d';
 // Database configuration
 export const DB_PORT = process.env.DB_PORT || '5432';
 export const DB_USERNAME = process.env.DB_USERNAME || 'postgres';

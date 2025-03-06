@@ -25,7 +25,7 @@ const repo = {
     userId: string,
     userData: Partial<User>,
   ): Promise<User> => {
-    const [_, user] = await DB.Users.update(userData, {
+    const [, user] = await DB.Users.update(userData, {
       where: { id: userId },
       returning: true,
     });

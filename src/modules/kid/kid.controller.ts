@@ -1,3 +1,5 @@
+// modules/kid/kid.controller.ts
+
 import { NextFunction, Request, Response } from 'express';
 import {
   createKidService,
@@ -6,7 +8,12 @@ import {
   getKidByRfidService,
   getParentKidsService,
   updateKidService,
+  getAllKidsService,
+  addKidToSchoolService,
+  removeKidFromSchoolService,
+  updateKidSchoolsService,
 } from './kid.service';
+import { UserRole } from '@/interfaces';
 
 export const getParentKidsController = async (
   req: Request,
@@ -15,13 +22,30 @@ export const getParentKidsController = async (
 ): Promise<void> => {
   try {
     const parentId = req.context?.userId;
-    const kids = await getParentKidsService(parentId);
 
-    res.status(200).json({
-      success: true,
-      message: 'Kids retrieved successfully',
-      data: kids,
-    });
+    // Pass along all query parameters
+    const queryParams = req.query;
+
+    const result = await getParentKidsService(parentId, queryParams);
+
+    res.status(200).json(result);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getAllKidsController = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> => {
+  try {
+    // Pass along all query parameters
+    const queryParams = req.query;
+
+    const result = await getAllKidsService(queryParams);
+
+    res.status(200).json(result);
   } catch (error) {
     next(error);
   }
@@ -35,13 +59,12 @@ export const getKidByIdController = async (
   try {
     const { id } = req.params;
     const parentId = req.context?.userId;
-    const kid = await getKidByIdService(id, parentId);
+    const role = (req.context?.role as UserRole) || UserRole.PARENT;
+    const includeSchools = req.query.includeSchools === 'true';
 
-    res.status(200).json({
-      success: true,
-      message: 'Kid retrieved successfully',
-      data: kid,
-    });
+    const result = await getKidByIdService(id, parentId, role, includeSchools);
+
+    res.status(200).json(result);
   } catch (error) {
     next(error);
   }
@@ -54,13 +77,9 @@ export const getKidByRfidController = async (
 ): Promise<void> => {
   try {
     const { token } = req.params;
-    const kid = await getKidByRfidService(token);
+    const result = await getKidByRfidService(token);
 
-    res.status(200).json({
-      success: true,
-      message: 'Kid retrieved successfully',
-      data: kid,
-    });
+    res.status(200).json(result);
   } catch (error) {
     next(error);
   }
@@ -73,18 +92,17 @@ export const createKidController = async (
 ): Promise<void> => {
   try {
     const parentId = req.context?.userId;
-    const kidData = {
-      ...req.body,
-      parent_id: parentId,
-    };
+    const { schoolIds, ...kidData } = req.body;
 
-    const newKid = await createKidService(kidData);
+    const result = await createKidService(
+      {
+        ...kidData,
+        parent_id: parentId,
+      },
+      schoolIds,
+    );
 
-    res.status(201).json({
-      success: true,
-      message: 'Kid created successfully',
-      data: newKid,
-    });
+    res.status(201).json(result);
   } catch (error) {
     next(error);
   }
@@ -98,15 +116,18 @@ export const updateKidController = async (
   try {
     const { id } = req.params;
     const parentId = req.context?.userId;
-    const kidData = req.body;
+    const role = (req.context?.role as UserRole) || UserRole.PARENT;
+    const { schoolIds, ...kidData } = req.body;
 
-    const updatedKid = await updateKidService(id, parentId, kidData);
+    const result = await updateKidService(
+      id,
+      parentId,
+      kidData,
+      role,
+      schoolIds,
+    );
 
-    res.status(200).json({
-      success: true,
-      message: 'Kid updated successfully',
-      data: updatedKid,
-    });
+    res.status(200).json(result);
   } catch (error) {
     next(error);
   }
@@ -120,13 +141,84 @@ export const deleteKidController = async (
   try {
     const { id } = req.params;
     const parentId = req.context?.userId;
+    const role = (req.context?.role as UserRole) || UserRole.PARENT;
 
-    await deleteKidService(id, parentId);
+    await deleteKidService(id, parentId, role);
 
     res.status(200).json({
       success: true,
       message: 'Kid deleted successfully',
+      data: [],
     });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const addKidToSchoolController = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> => {
+  try {
+    const { kidId, schoolId } = req.params;
+    const parentId = req.context?.userId;
+    const role = req.context?.role;
+
+    const result = await addKidToSchoolService(kidId, schoolId, parentId, role);
+
+    res.status(200).json(result);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const removeKidFromSchoolController = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> => {
+  try {
+    const { kidId, schoolId } = req.params;
+    const parentId = req.context?.userId;
+    const role = req.context?.role;
+
+    const result = await removeKidFromSchoolService(
+      kidId,
+      schoolId,
+      parentId,
+      role,
+    );
+
+    res.status(200).json(result);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const updateKidSchoolsController = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> => {
+  try {
+    const { kidId } = req.params;
+    const { schoolIds } = req.body;
+    const parentId = req.context?.userId;
+    const role = req.context?.role;
+
+    if (!Array.isArray(schoolIds)) {
+      throw new Error('schoolIds must be an array');
+    }
+
+    const result = await updateKidSchoolsService(
+      kidId,
+      schoolIds,
+      parentId,
+      role,
+    );
+
+    res.status(200).json(result);
   } catch (error) {
     next(error);
   }

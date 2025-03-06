@@ -1,0 +1,55 @@
+components:
+  schemas:
+    kidSchool:
+      type: object
+      required:
+        - kid_id
+        - school_id
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+          example: "123e4567-e89b-12d3-a456-426614174444"
+        kid_id:
+          type: string
+          format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174222"
+        school_id:
+          type: string
+          format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174333"
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+
+    kidSchoolList:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: "Kid-school associations retrieved successfully"
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/kidSchool'
+
+    updateKidSchools:
+      type: object
+      required:
+        - school_ids
+      properties:
+        school_ids:
+          type: array
+          items:
+            type: string
+            format: uuid
+          example: ["123e4567-e89b-12d3-a456-426614174333", "123e4567-e89b-12d3-a456-426614174555"]

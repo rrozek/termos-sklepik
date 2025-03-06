@@ -1,3 +1,5 @@
+// modules/product-group/product-group.controller.ts
+
 import { NextFunction, Request, Response } from 'express';
 import {
   createProductGroupService,
@@ -7,24 +9,26 @@ import {
   updateProductGroupService,
 } from './product-group.service';
 
+/**
+ * Get all product groups with filtering and pagination
+ */
 export const getAllProductGroupsController = async (
   req: Request,
   res: Response,
   next: NextFunction,
 ): Promise<void> => {
   try {
-    const productGroups = await getAllProductGroupsService();
-
-    res.status(200).json({
-      success: true,
-      message: 'Product groups retrieved successfully',
-      data: productGroups,
-    });
+    // Pass all query parameters to the service
+    const result = await getAllProductGroupsService(req.query);
+    res.status(200).json(result);
   } catch (error) {
     next(error);
   }
 };
 
+/**
+ * Get a product group by ID
+ */
 export const getProductGroupByIdController = async (
   req: Request,
   res: Response,
@@ -32,18 +36,16 @@ export const getProductGroupByIdController = async (
 ): Promise<void> => {
   try {
     const { id } = req.params;
-    const productGroup = await getProductGroupByIdService(id);
-
-    res.status(200).json({
-      success: true,
-      message: 'Product group retrieved successfully',
-      data: productGroup,
-    });
+    const result = await getProductGroupByIdService(id);
+    res.status(200).json(result);
   } catch (error) {
     next(error);
   }
 };
 
+/**
+ * Create a new product group
+ */
 export const createProductGroupController = async (
   req: Request,
   res: Response,
@@ -51,18 +53,16 @@ export const createProductGroupController = async (
 ): Promise<void> => {
   try {
     const productGroupData = req.body;
-    const newProductGroup = await createProductGroupService(productGroupData);
-
-    res.status(201).json({
-      success: true,
-      message: 'Product group created successfully',
-      data: newProductGroup,
-    });
+    const result = await createProductGroupService(productGroupData);
+    res.status(201).json(result);
   } catch (error) {
     next(error);
   }
 };
 
+/**
+ * Update an existing product group
+ */
 export const updateProductGroupController = async (
   req: Request,
   res: Response,
@@ -71,22 +71,16 @@ export const updateProductGroupController = async (
   try {
     const { id } = req.params;
     const productGroupData = req.body;
-
-    const updatedProductGroup = await updateProductGroupService(
-      id,
-      productGroupData,
-    );
-
-    res.status(200).json({
-      success: true,
-      message: 'Product group updated successfully',
-      data: updatedProductGroup,
-    });
+    const result = await updateProductGroupService(id, productGroupData);
+    res.status(200).json(result);
   } catch (error) {
     next(error);
   }
 };
 
+/**
+ * Delete a product group
+ */
 export const deleteProductGroupController = async (
   req: Request,
   res: Response,
@@ -94,13 +88,8 @@ export const deleteProductGroupController = async (
 ): Promise<void> => {
   try {
     const { id } = req.params;
-
-    await deleteProductGroupService(id);
-
-    res.status(200).json({
-      success: true,
-      message: 'Product group deleted successfully',
-    });
+    const result = await deleteProductGroupService(id);
+    res.status(200).json(result);
   } catch (error) {
     next(error);
   }

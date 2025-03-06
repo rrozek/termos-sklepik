@@ -1,38 +1,47 @@
-# [GET] Get All Kids for Parent
-/kid:
+# [GET] Get All Schools
+/school:
   get:
     tags:
-      - Kid
-    summary: Get all kids for parent
-    description: Retrieves all kids associated with the authenticated parent
+      - School
+    summary: Get all schools
+    description: Retrieves all schools
     responses:
       200:
-        description: 'Kids retrieved successfully'
+        description: 'Schools retrieved successfully'
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/kidList'
-      401:
-        description: 'Unauthorized - Authentication required'
+              type: object
+              properties:
+                success:
+                  type: boolean
+                  example: true
+                message:
+                  type: string
+                  example: 'Schools retrieved successfully'
+                data:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/school'
       500:
         description: 'Internal server error'
     security:
       - bearerAuth: []
   post:
     tags:
-      - Kid
-    summary: Create a new kid
-    description: Creates a new kid for the authenticated parent
+      - School
+    summary: Create a new school
+    description: Creates a new school (staff only)
     requestBody:
-      description: Kid information
+      description: School information
       required: true
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/createKid'
+            $ref: '#/components/schemas/createSchool'
     responses:
       201:
-        description: 'Kid created successfully'
+        description: 'School created successfully'
         content:
           application/json:
             schema:
@@ -43,37 +52,38 @@
                   example: true
                 message:
                   type: string
-                  example: 'Kid created successfully'
+                  example: 'School created successfully'
                 data:
-                  $ref: '#/components/schemas/kid'
+                  $ref: '#/components/schemas/school'
       400:
         description: 'Bad Request - Invalid input parameters'
       401:
         description: 'Unauthorized - Authentication required'
-      409:
-        description: 'Conflict - RFID token already assigned to another kid'
+      403:
+        description: 'Forbidden - Staff access required'
       500:
         description: 'Internal server error'
     security:
       - bearerAuth: []
 
-/kid/{id}:
+# [GET] Get School by ID
+/school/{id}:
   get:
     tags:
-      - Kid
-    summary: Get kid by ID
-    description: Retrieves a specific kid by ID for the authenticated parent
+      - School
+    summary: Get school by ID
+    description: Retrieves a school by its ID
     parameters:
       - name: id
         in: path
+        description: School ID
         required: true
         schema:
           type: string
           format: uuid
-        description: Kid ID
     responses:
       200:
-        description: 'Kid retrieved successfully'
+        description: 'School retrieved successfully'
         content:
           application/json:
             schema:
@@ -84,42 +94,38 @@
                   example: true
                 message:
                   type: string
-                  example: 'Kid retrieved successfully'
+                  example: 'School retrieved successfully'
                 data:
-                  $ref: '#/components/schemas/kid'
-      401:
-        description: 'Unauthorized - Authentication required'
-      403:
-        description: 'Forbidden - Kid does not belong to this parent'
+                  $ref: '#/components/schemas/school'
       404:
-        description: 'Kid not found'
+        description: 'School not found'
       500:
         description: 'Internal server error'
     security:
       - bearerAuth: []
   put:
     tags:
-      - Kid
-    summary: Update a kid
-    description: Updates an existing kid for the authenticated parent
+      - School
+    summary: Update school
+    description: Updates a school by its ID (staff only)
     parameters:
       - name: id
         in: path
+        description: School ID
         required: true
         schema:
           type: string
           format: uuid
-        description: Kid ID
     requestBody:
-      description: Kid information to update
+      description: School information to update
       required: true
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/createKid'
+            $ref: '#/components/schemas/updateSchool'
     responses:
       200:
-        description: 'Kid updated successfully'
+        description: 'School updated successfully'
         content:
           application/json:
             schema:
@@ -130,39 +136,37 @@
                   example: true
                 message:
                   type: string
-                  example: 'Kid updated successfully'
+                  example: 'School updated successfully'
                 data:
-                  $ref: '#/components/schemas/kid'
+                  $ref: '#/components/schemas/school'
       400:
         description: 'Bad Request - Invalid input parameters'
       401:
         description: 'Unauthorized - Authentication required'
       403:
-        description: 'Forbidden - Kid does not belong to this parent'
+        description: 'Forbidden - Staff access required'
       404:
-        description: 'Kid not found'
-      409:
-        description: 'Conflict - RFID token already assigned to another kid'
+        description: 'School not found'
       500:
         description: 'Internal server error'
     security:
       - bearerAuth: []
   delete:
     tags:
-      - Kid
-    summary: Delete a kid
-    description: Deletes or deactivates a kid (deactivates if kid has order history)
+      - School
+    summary: Delete school
+    description: Deletes a school by its ID (admin only)
     parameters:
       - name: id
         in: path
+        description: School ID
         required: true
         schema:
           type: string
           format: uuid
-        description: Kid ID
     responses:
       200:
-        description: 'Kid deleted successfully'
+        description: 'School deleted successfully'
         content:
           application/json:
             schema:
@@ -173,65 +177,28 @@
                   example: true
                 message:
                   type: string
-                  example: 'Kid deleted successfully'
+                  example: 'School deleted successfully'
       401:
         description: 'Unauthorized - Authentication required'
       403:
-        description: 'Forbidden - Kid does not belong to this parent'
+        description: 'Forbidden - Admin access required'
       404:
-        description: 'Kid not found'
+        description: 'School not found'
       500:
         description: 'Internal server error'
     security:
       - bearerAuth: []
 
-# [GET] Get Kid By RFID
-/kid/rfid/{token}:
+# [GET] Get Kid Schools
+/school/kid/{kidId}:
   get:
     tags:
-      - Kid
-    summary: Get kid by RFID token
-    description: Retrieves a kid by their RFID token (primarily for kiosk authentication)
-    parameters:
-      - name: token
-        in: path
-        required: true
-        schema:
-          type: string
-        description: RFID token
-    responses:
-      200:
-        description: 'Kid retrieved successfully'
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                success:
-                  type: boolean
-                  example: true
-                message:
-                  type: string
-                  example: 'Kid retrieved successfully'
-                data:
-                  $ref: '#/components/schemas/kid'
-      404:
-        description: 'Kid not found with this RFID token'
-      500:
-        description: 'Internal server error'
-    security:
-      - bearerAuth: []
-
-# [GET] Get Schools for Kid
-/kid/{id}/schools:
-  get:
-    tags:
-      - Kid
+      - School
       - Kid-School
     summary: Get schools for a kid
     description: Retrieves all schools associated with a kid
     parameters:
-      - name: id
+      - name: kidId
         in: path
         description: Kid ID
         required: true
@@ -262,59 +229,12 @@
         description: 'Internal server error'
     security:
       - bearerAuth: []
-  put:
-    tags:
-      - Kid
-      - Kid-School
-    summary: Update schools for a kid
-    description: Updates all school associations for a kid
-    parameters:
-      - name: id
-        in: path
-        description: Kid ID
-        required: true
-        schema:
-          type: string
-          format: uuid
-    requestBody:
-      description: School IDs to associate with the kid
-      required: true
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/updateKidSchools'
-    responses:
-      200:
-        description: 'Kid schools updated successfully'
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                success:
-                  type: boolean
-                  example: true
-                message:
-                  type: string
-                  example: 'Kid schools updated successfully'
-                data:
-                  type: array
-                  items:
-                    $ref: '#/components/schemas/school'
-      400:
-        description: 'Bad Request - Invalid input parameters'
-      404:
-        description: 'Kid not found'
-      500:
-        description: 'Internal server error'
-    security:
-      - bearerAuth: []
 
 # [POST] Add Kid to School
-/kid/{kidId}/school/{schoolId}:
+/school/kid/{kidId}/school/{schoolId}:
   post:
     tags:
-      - Kid
+      - School
       - Kid-School
     summary: Add kid to school
     description: Associates a kid with a school
@@ -359,7 +279,7 @@
       - bearerAuth: []
   delete:
     tags:
-      - Kid
+      - School
       - Kid-School
     summary: Remove kid from school
     description: Removes a kid from a school
@@ -398,4 +318,3 @@
         description: 'Internal server error'
     security:
       - bearerAuth: []
-

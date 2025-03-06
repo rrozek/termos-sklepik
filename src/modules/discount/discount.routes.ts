@@ -8,7 +8,7 @@ import {
   getDiscountsByTargetController,
   updateDiscountController,
 } from './discount.controller';
-import { adminMiddleware } from '@/middlewares/admin.middleware';
+import { adminMiddleware } from '@/middlewares/auth.middleware';
 
 const discountRouter = express.Router();
 

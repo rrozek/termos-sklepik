@@ -1,15 +1,15 @@
 import { JWT_EXPIRATION } from '@/config';
 import jwt from 'jsonwebtoken';
 
-export const generateJWT = async (payload: any, secretKey: string, expiresIn?: string) => {
+export const generateJWT = async (
+  payload: any,
+  secretKey: string,
+  expiresIn?: string,
+) => {
   try {
-    const token = jwt.sign(
-      payload,
-      secretKey,
-      {
-        expiresIn: expiresIn || JWT_EXPIRATION
-      }
-    );
+    const token = jwt.sign(payload, secretKey, {
+      expiresIn: expiresIn || JWT_EXPIRATION,
+    });
     return `${token}`;
   } catch (error: any) {
     throw new Error(error.message);
@@ -23,7 +23,7 @@ export const verifyJWT = async (
   try {
     const cleanedToken = token.replace('Bearer ', '');
     const data = jwt.verify(cleanedToken, secretKey, {
-      complete: false // Ensure expiration is checked
+      complete: false, // Ensure expiration is checked
     });
 
     if (typeof data === 'string') {

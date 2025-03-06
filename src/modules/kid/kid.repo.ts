@@ -1,55 +1,128 @@
+// modules/kid/kid.repo.ts
+
+import { BaseRepository } from '@/base/repository.base';
 import { DB } from '@/database';
-import { KidCreationAttributes } from '@/database/models/kid.model';
 import { Kid } from '@/interfaces';
+import { KidModel } from '@/database/models/kid.model';
 import { Op } from 'sequelize';
 
-const kidRepo = {
-  findKidsByParentId: async (parentId: string): Promise<Kid[]> => {
-    return await DB.Kids.findAll({
-      where: { parent_id: parentId },
-      order: [['created_at', 'DESC']],
-    });
-  },
+class KidRepository extends BaseRepository<KidModel> {
+  constructor() {
+    super(DB.Kids);
+  }
 
-  findKidById: async (kidId: string): Promise<Kid | null> => {
-    return await DB.Kids.findByPk(kidId);
-  },
+  /**
+   * Find kids by parent ID with filtering
+   * @param {string} parentId - Parent ID
+   * @param {Object} queryParams - Request query parameters
+   * @returns {Promise<Object>} Kids and pagination metadata
+   */
+  async findKidsByParentId(
+    parentId: string,
+    queryParams: any = {},
+  ): Promise<any> {
+    const { page, limit, skip } = this.getPaginationParams(queryParams);
+    const { name, isActive, schoolId } = queryParams;
 
-  findKidByRfid: async (rfidToken: string): Promise<Kid | null> => {
-    return await DB.Kids.findOne({
-      where: {
-        rfid_token: { [Op.contains]: [rfidToken] },
-        is_active: true,
+    const whereClause: any = {
+      parent_id: parentId,
+    };
+
+    if (name) {
+      whereClause.name = {
+        [Op.iLike]: `%${name}%`,
+      };
+    }
+
+    if (isActive !== undefined) {
+      whereClause.is_active = isActive === 'true';
+    }
+
+    const include = [
+      {
+        model: DB.Schools,
+        as: 'schools',
+        through: { attributes: [] }, // Don't include join table attributes
+        required: Boolean(schoolId), // Only required if filtering by schoolId
       },
-    });
-  },
+    ];
 
-  createKid: async (kidData: KidCreationAttributes): Promise<Kid> => {
-    return await DB.Kids.create(kidData);
-  },
+    if (schoolId) {
+      include[0].where = { id: schoolId };
+    }
 
-  updateKid: async (kidId: string, kidData: Partial<Kid>): Promise<Kid> => {
-    const [_, updatedKids] = await DB.Kids.update(kidData, {
-      where: { id: kidId },
-      returning: true,
-    });
+    try {
+      const { rows, count } = await DB.Kids.findAndCountAll({
+        where: whereClause,
+        include,
+        order: [['name', 'ASC']],
+        limit,
+        offset: skip,
+        distinct: true, // Needed for correct count with associations
+      });
 
-    return updatedKids[0];
-  },
+      return {
+        data: rows,
+        page,
+        limit,
+        totalItems: count,
+        totalPages: Math.ceil(count / limit),
+        hasNextPage: page < Math.ceil(count / limit),
+        hasPrevPage: page > 1,
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
 
-  deleteKid: async (kidId: string): Promise<number> => {
-    return await DB.Kids.destroy({ where: { id: kidId } });
-  },
+  /**
+   * Find a kid by RFID token
+   * @param {string} rfidToken - RFID token
+   * @returns {Promise<KidModel|null>} Kid
+   */
+  async findKidByRfid(rfidToken: string): Promise<KidModel | null> {
+    try {
+      return await DB.Kids.findOne({
+        where: {
+          rfid_token: { [Op.contains]: [rfidToken] },
+          is_active: true,
+        },
+        include: [
+          {
+            model: DB.Schools,
+            as: 'schools',
+            through: { attributes: [] },
+            required: false,
+          },
+        ],
+      });
+    } catch (error) {
+      throw error;
+    }
+  }
 
-  checkParentExists: async (parentId: string): Promise<boolean> => {
-    const count = await DB.Users.count({ where: { id: parentId } });
-    return count > 0;
-  },
+  /**
+   * Check if a kid has any orders
+   * @param {string} kidId - Kid ID
+   * @returns {Promise<boolean>} Whether kid has orders
+   */
+  async checkKidHasOrders(kidId: string): Promise<boolean> {
+    try {
+      const count = await DB.Orders.count({ where: { kid_id: kidId } });
+      return count > 0;
+    } catch (error) {
+      throw error;
+    }
+  }
 
-  checkKidHasOrders: async (kidId: string): Promise<boolean> => {
-    const count = await DB.Orders.count({ where: { kid_id: kidId } });
-    return count > 0;
-  },
-};
+  // Helper method to get pagination parameters
+  private getPaginationParams(query: any) {
+    const page = parseInt(query.page?.toString() || '1', 10);
+    const limit = parseInt(query.limit?.toString() || '10', 10);
+    const skip = (page - 1) * limit;
 
-export default kidRepo;
+    return { page, limit, skip };
+  }
+}
+
+export default new KidRepository();
