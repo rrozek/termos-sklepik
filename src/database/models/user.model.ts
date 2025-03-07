@@ -3,7 +3,7 @@ import { User, UserRole } from '@/interfaces';
 
 export type UserCreationAttributes = Optional<
   User,
-  'id' | 'created_at' | 'updated_at'
+  'id' | 'created_at' | 'updated_at' | 'phone'
 >;
 
 export class UserModel
@@ -16,6 +16,7 @@ export class UserModel
   public name!: string;
   public role!: UserRole;
   public portal_user_id!: number;
+  public phone?: string;
   public is_active!: boolean;
   public created_at!: Date;
   public updated_at!: Date;
@@ -52,6 +53,10 @@ export default function (sequelize: Sequelize): typeof UserModel {
       },
       portal_user_id: {
         type: DataTypes.INTEGER,
+        allowNull: true,
+      },
+      phone: {
+        type: DataTypes.STRING(20),
         allowNull: true,
       },
       is_active: {

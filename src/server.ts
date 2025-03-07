@@ -9,6 +9,7 @@ import { PORT } from './config';
 import { errorHandler } from './utils/error-handler';
 import { swaggerSpec, swaggerUi } from './utils/swagger';
 import { standardizeResponse } from './middlewares/response.middleware';
+import { initScheduler } from './utils/scheduler';
 
 const appServer = express();
 const port = PORT;
@@ -66,6 +67,10 @@ DB.sequelize
   .authenticate()
   .then(() => {
     logger.info('Database connected successfully!');
+
+    // Initialize scheduler
+    initScheduler();
+
     appServer.listen(port, () => {
       logger.info(`Server is running on http://localhost:${port}`);
     });

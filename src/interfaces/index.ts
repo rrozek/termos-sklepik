@@ -7,3 +7,4 @@ export * from './order-item.interfaces';
 export * from './discount.interfaces';
 export * from './school.interfaces';
 export * from './kid-school.interfaces';
+export * from './kid-monthly-spending.interfaces';

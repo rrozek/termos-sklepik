@@ -5,7 +5,7 @@ import { DB } from '@/database';
 import { Order, OrderItem } from '@/interfaces';
 import { OrderModel } from '@/database/models/order.model';
 import { OrderItemModel } from '@/database/models/order-item.model';
-import { Op, WhereOptions, Transaction } from 'sequelize';
+import { Op, WhereOptions, Transaction, IncludeOptions } from 'sequelize';
 
 class OrderRepository extends BaseRepository<OrderModel> {
   constructor() {
@@ -515,19 +515,13 @@ class OrderRepository extends BaseRepository<OrderModel> {
 
   /**
    * Create an order item
-   * @param {OrderItemModel} orderItemData - Order item data
-   * @param {Transaction} transaction - Sequelize transaction
+   * @param {Partial<OrderItem>} orderItemData - Order item data
    * @returns {Promise<OrderItemModel>} Created order item
    */
   async createOrderItem(
-    orderItemData: any,
-    transaction?: Transaction,
+    orderItemData: Partial<OrderItem>,
   ): Promise<OrderItemModel> {
-    try {
-      return await DB.OrderItems.create(orderItemData, { transaction });
-    } catch (error) {
-      throw error;
-    }
+    return await DB.OrderItems.create(orderItemData as any);
   }
 
   /**
@@ -634,6 +628,45 @@ class OrderRepository extends BaseRepository<OrderModel> {
     } catch (error) {
       throw error;
     }
+  }
+
+  /**
+   * Find an order by ID with includes
+   * @param {string} orderId - Order ID
+   * @param {Array} includes - Associations to include
+   * @returns {Promise<OrderModel|null>} Order
+   */
+  async findById(
+    orderId: string,
+    includes?: Array<{
+      association: string;
+      attributes?: string[];
+      include?: any[];
+    }>,
+  ): Promise<OrderModel | null> {
+    const includeOptions: IncludeOptions[] = [];
+
+    if (includes) {
+      includes.forEach(include => {
+        const includeOption: IncludeOptions = {
+          association: include.association as any,
+        };
+
+        if (include.attributes) {
+          includeOption.attributes = include.attributes;
+        }
+
+        if (include.include) {
+          includeOption.include = include.include;
+        }
+
+        includeOptions.push(includeOption);
+      });
+    }
+
+    return await DB.Orders.findByPk(orderId, {
+      include: includeOptions.length > 0 ? includeOptions : undefined,
+    });
   }
 
   // Helper method to get pagination parameters

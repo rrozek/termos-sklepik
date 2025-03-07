@@ -55,6 +55,17 @@ export const MAX_FILE_SIZE = parseInt(
 // CORS configuration
 export const CORS_ORIGIN = process.env.CORS_ORIGIN || '*';
 
+// Email configuration
+export const EMAIL_FROM = process.env.EMAIL_FROM || '';
+export const EMAIL_SERVICE = process.env.EMAIL_SERVICE || '';
+export const EMAIL_USER = process.env.EMAIL_USER || '';
+export const EMAIL_PASSWORD = process.env.EMAIL_PASSWORD || '';
+
+// SMS configuration
+export const SMS_API_KEY = process.env.SMS_API_KEY || '';
+export const SMS_API_SECRET = process.env.SMS_API_SECRET || '';
+export const SMS_FROM_NUMBER = process.env.SMS_FROM_NUMBER || '';
+
 // Validate required configuration
 const requiredConfig = [
   'JWT_ACCESS_TOKEN_SECRET',

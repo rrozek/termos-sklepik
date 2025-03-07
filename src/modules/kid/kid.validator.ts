@@ -52,16 +52,18 @@ export const validateKidWithSchools = (data: any, isUpdate = false) => {
   const kidSchema = validateKid(data, isUpdate);
 
   const schoolIdsSchema = Joi.object({
-    schoolIds: Joi.array().items(
-      Joi.string().uuid().messages({
-        'string.guid': 'School ID must be in UUID format',
-      })
-    ).optional(),
+    schoolIds: Joi.array()
+      .items(
+        Joi.string().uuid().messages({
+          'string.guid': 'School ID must be in UUID format',
+        }),
+      )
+      .optional(),
   });
 
   const { error: schoolError } = schoolIdsSchema.validate(
     { schoolIds: data.schoolIds },
-    options
+    options,
   );
 
   if (kidSchema.error) return kidSchema;

@@ -11,6 +11,7 @@ export interface User {
   name: string;
   role: UserRole;
   portal_user_id: number;
+  phone?: string;
   is_active: boolean;
   created_at: Date | undefined;
   updated_at: Date | undefined;

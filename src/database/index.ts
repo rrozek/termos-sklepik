@@ -9,6 +9,7 @@ import orderItemModel from './models/order-item.model';
 import discountModel from './models/discount.model';
 import schoolModel from './models/school.model';
 import kidSchoolModel from './models/kid-school.model';
+import kidMonthlySpendingModel from './models/kid-monthly-spending.model';
 import {
   DB_DIALECT,
   DB_HOST,
@@ -58,6 +59,7 @@ const OrderItems = orderItemModel(sequelize);
 const Discounts = discountModel(sequelize);
 const Schools = schoolModel(sequelize);
 const KidSchools = kidSchoolModel(sequelize);
+const KidMonthlySpendings = kidMonthlySpendingModel(sequelize);
 
 // Define associations
 Users.hasMany(Kids, { foreignKey: 'parent_id', as: 'kids' });
@@ -98,6 +100,13 @@ Schools.belongsToMany(Kids, {
   as: 'kids',
 });
 
+// Monthly spending associations
+Kids.hasMany(KidMonthlySpendings, {
+  foreignKey: 'kid_id',
+  as: 'monthly_spendings',
+});
+KidMonthlySpendings.belongsTo(Kids, { foreignKey: 'kid_id', as: 'kid' });
+
 export const DB = {
   Users,
   Kids,
@@ -108,6 +117,7 @@ export const DB = {
   Discounts,
   Schools,
   KidSchools,
+  KidMonthlySpendings,
   sequelize, // connection instance (RAW queries)
   Sequelize, // library
 };

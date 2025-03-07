@@ -11,7 +11,14 @@ import {
   removeKidFromSchoolController,
   updateKidSchoolsController,
 } from './kid.controller';
-import { adminMiddleware, staffMiddleware } from '@/middlewares/auth.middleware';
+import {
+  getKidRemainingBudgetController,
+  getKidSpendingHistoryController,
+} from './kid-spending.controller';
+import {
+  adminMiddleware,
+  staffMiddleware,
+} from '@/middlewares/auth.middleware';
 
 const kidRouter = express.Router();
 
@@ -44,7 +51,6 @@ kidRouter.put('/:id', updateKidController);
 // - Admin/Staff can delete any kid
 kidRouter.delete('/:id', deleteKidController);
 
-
 // Add a kid to a school
 kidRouter.post('/:kidId/school/:schoolId', addKidToSchoolController);
 
@@ -54,5 +60,11 @@ kidRouter.delete('/:kidId/school/:schoolId', removeKidFromSchoolController);
 // Update all schools for a kid
 kidRouter.put('/:kidId/schools', updateKidSchoolsController);
 
+// Kid spending endpoints
+// Get kid's remaining budget for the current month
+kidRouter.get('/:kidId/budget', getKidRemainingBudgetController);
+
+// Get kid's spending history
+kidRouter.get('/:kidId/spending', getKidSpendingHistoryController);
 
 export default kidRouter;

@@ -38,7 +38,7 @@ class KidRepository extends BaseRepository<KidModel> {
       whereClause.is_active = isActive === 'true';
     }
 
-    const include = [
+    const include: any[] = [
       {
         model: DB.Schools,
         as: 'schools',
@@ -110,6 +110,46 @@ class KidRepository extends BaseRepository<KidModel> {
     try {
       const count = await DB.Orders.count({ where: { kid_id: kidId } });
       return count > 0;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  /**
+   * Find a kid with its schools
+   * @param {string} kidId - Kid ID
+   * @returns {Promise<KidModel|null>} Kid with schools
+   */
+  async findKidWithSchools(kidId: string): Promise<KidModel | null> {
+    try {
+      return await DB.Kids.findByPk(kidId, {
+        include: [
+          {
+            model: DB.Schools,
+            as: 'schools',
+            through: { attributes: [] },
+          },
+        ],
+      });
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  /**
+   * Find all kids with spending limits
+   * @returns {Promise<KidModel[]>} Kids with spending limits
+   */
+  async findAllWithSpendingLimits(): Promise<KidModel[]> {
+    try {
+      return await DB.Kids.findAll({
+        where: {
+          is_active: true,
+          monthly_spending_limit: {
+            [Op.gt]: 0,
+          },
+        },
+      });
     } catch (error) {
       throw error;
     }

@@ -35,7 +35,7 @@ export const standardizeResponse = () => {
         /\/[a-zA-Z0-9-_]+\/[a-zA-Z0-9-_]+$/.test(path);
 
       // Default standardized response structure
-      let standardResponse: any = {
+      const standardResponse: any = {
         success: true,
         message: '',
         data: isSingleItem ? {} : [],

@@ -9,7 +9,10 @@ import {
   updateOrderStatusController,
   cancelOrderController,
 } from './order.controller';
-import { adminMiddleware, staffMiddleware } from '@/middlewares/auth.middleware';
+import {
+  adminMiddleware,
+  staffMiddleware,
+} from '@/middlewares/auth.middleware';
 
 const orderRouter = express.Router();
 

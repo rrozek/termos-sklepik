@@ -1,6 +1,6 @@
 import { User, UserRole } from '@/interfaces';
 import { validateSignIn, validateSignUp } from './auth.validator';
-import repo from './auth.repo';
+import authRepo from './auth.repo';
 import { compareSync, hash } from 'bcrypt';
 import { generateJWT, verifyJWT } from '@/middlewares/jwt.service';
 import {
@@ -15,6 +15,7 @@ import { CustomError } from '@/utils/custom-error';
 import axios from 'axios';
 import logger from '@/utils/logger';
 import { sendSuccess } from '@/middlewares/response.middleware';
+import kidRepo from '../kid/kid.repo';
 
 export const signUpService = async (userData: User) => {
   const { error } = validateSignUp(userData);
@@ -22,13 +23,13 @@ export const signUpService = async (userData: User) => {
     throw new CustomError(error.details[0].message, 400);
   }
 
-  const findUser = await repo.findUserByEmail(userData.email);
+  const findUser = await authRepo.findUserByEmail(userData.email);
   if (findUser) {
     throw new CustomError(`Email ${userData.email} already exists`, 409);
   }
 
   const hashedPassword = await hash(userData.password, 10);
-  const newUserData = await repo.createUser({
+  const newUserData = await authRepo.createUser({
     ...userData,
     password: hashedPassword,
     role: userData.role || UserRole.PARENT,
@@ -56,7 +57,9 @@ export const signInService = async (userData: User) => {
         email: userData.email,
         password: userData.password,
       });
-      logger.info(`djangoTokenResponse: ${JSON.stringify(djangoTokenResponse.data)}`);
+      logger.info(
+        `djangoTokenResponse: ${JSON.stringify(djangoTokenResponse.data)}`,
+      );
       if (djangoTokenResponse.data && djangoTokenResponse.data.access) {
         // Decode Django token to get user_id
         const djangoPayload = await verifyJWT(
@@ -81,69 +84,87 @@ export const signInService = async (userData: User) => {
   }
 
   // Find user in our database
-  let user = await repo.findUserByEmail(userData.email);
+  let user = await authRepo.findUserByEmail(userData.email);
 
   if (djangoUserId) {
-// If Django auth succeeded but user doesn't exist in our DB, create them
+    // If Django auth succeeded but user doesn't exist in our DB, create them
     if (!user) {
       // Try to get user profile and kids from Django
       let djangoUserProfile = null;
       try {
         const profileResponse = await axios.get(`${DJANGO_API_URL}/users/me/`, {
-          headers: { Authorization: `Bearer ${djangoTokenResponse!.data.access}` },
+          headers: {
+            Authorization: `Bearer ${djangoTokenResponse!.data.access}`,
+          },
         });
         djangoUserProfile = profileResponse.data;
-        logger.info(`Django user profile: ${JSON.stringify(djangoUserProfile)}`);
+        logger.info(
+          `Django user profile: ${JSON.stringify(djangoUserProfile)}`,
+        );
       } catch (profileError) {
-        logger.error(`Failed to get Django user profile: ${profileError instanceof Error ? profileError.message : 'Unknown error'}`);
+        logger.error(
+          `Failed to get Django user profile: ${profileError instanceof Error ? profileError.message : 'Unknown error'}`,
+        );
       }
 
       // Create user with information from Django if available
-      const userName = djangoUserProfile && djangoUserProfile.profile
-        ? `${djangoUserProfile.profile.first_name} ${djangoUserProfile.profile.last_name}`.trim()
-        : userData.email.split('@')[0];
+      const userName =
+        djangoUserProfile && djangoUserProfile.profile
+          ? `${djangoUserProfile.profile.first_name} ${djangoUserProfile.profile.last_name}`.trim()
+          : userData.email.split('@')[0];
 
-      user = await repo.createUser({
+      // Extract phone number if available
+      const phone =
+        djangoUserProfile &&
+        djangoUserProfile.profile &&
+        djangoUserProfile.profile.phone
+          ? djangoUserProfile.profile.phone
+          : undefined;
+
+      user = await authRepo.createUser({
         email: userData.email,
         password: await hash(Math.random().toString(36), 10), // random password, not used
         name: userName,
         role: UserRole.PARENT,
         portal_user_id: djangoUserId,
+        phone,
         is_active: true,
       });
 
       // If we got kids from Django, create them in our system
-      if (djangoUserProfile && djangoUserProfile.kids && djangoUserProfile.kids.length > 0) {
-        const { DB } = require('@/database');
-        const transaction = await DB.sequelize.transaction();
-
+      if (
+        djangoUserProfile &&
+        djangoUserProfile.kids &&
+        djangoUserProfile.kids.length > 0
+      ) {
         try {
           for (const djangoKid of djangoUserProfile.kids) {
             // Only import active kids
             if (djangoKid.is_active) {
-              // Create kid in our system
-              const kid = await DB.Kids.create({
+              // Create kid in our system using the kid repository
+              await kidRepo.create({
                 name: `${djangoKid.first_name} ${djangoKid.last_name}`.trim(),
                 parent_id: user.id,
                 rfid_token: [], // Empty by default, will be assigned later
                 monthly_spending_limit: 0, // Default, parent will set this
                 is_active: true,
-              }, { transaction });
+              });
 
-              logger.info(`Created kid from Django: ${kid.id} - ${kid.name}`);
+              logger.info(
+                `Created kid from Django: ${djangoKid.first_name} ${djangoKid.last_name}`,
+              );
             }
           }
-
-          await transaction.commit();
         } catch (kidError) {
-          await transaction.rollback();
-          logger.error(`Failed to create kids from Django: ${kidError instanceof Error ? kidError.message : 'Unknown error'}`);
+          logger.error(
+            `Failed to create kids from Django: ${kidError instanceof Error ? kidError.message : 'Unknown error'}`,
+          );
         }
       }
     }
     // If user exists but doesn't have Django ID, update it
     else if (!user.portal_user_id) {
-      await repo.updateUser(user.id, { portal_user_id: djangoUserId });
+      await authRepo.updateUser(user.id, { portal_user_id: djangoUserId });
       user.portal_user_id = djangoUserId;
     }
   }
@@ -199,7 +220,7 @@ export const refreshTokenService = async (refreshToken: string) => {
 
     // Check if user exists and is active
     const userId = payload.userId;
-    const user = await repo.findUserById(userId);
+    const user = await authRepo.findUserById(userId);
 
     if (!user || !user.is_active) {
       throw new CustomError('Invalid refresh token', 401);
@@ -236,9 +257,9 @@ export const verifyDjangoTokenService = async (token: string) => {
     const payload = await verifyJWT(token, DJANGO_JWT_SECRET as string);
 
     // Check if user exists in our system
-    let user = await repo.findUserByPortalUserId(payload.user_id);
+    let user = await authRepo.findUserByPortalUserId(payload.user_id);
 
-// If not, fetch user details from Django API and create in our system
+    // If not, fetch user details from Django API and create in our system
     if (!user) {
       try {
         // Make API call to Django to get user details
@@ -254,46 +275,53 @@ export const verifyDjangoTokenService = async (token: string) => {
           ? `${djangoUser.profile.first_name} ${djangoUser.profile.last_name}`.trim()
           : djangoUser.email.split('@')[0];
 
+        // Extract phone number if available
+        const phone =
+          djangoUser.profile && djangoUser.profile.phone
+            ? djangoUser.profile.phone
+            : undefined;
+
         // Create user in our system
-        user = await repo.createUser({
+        user = await authRepo.createUser({
           email: djangoUser.email,
           password: await hash(Math.random().toString(36), 10), // random password
           name: userName,
           role: UserRole.PARENT,
           portal_user_id: payload.user_id,
+          phone,
           is_active: true,
         });
 
         // If we got kids from Django, create them in our system
         if (djangoUser.kids && djangoUser.kids.length > 0) {
-          const { DB } = require('@/database');
-          const transaction = await DB.sequelize.transaction();
-
           try {
             for (const djangoKid of djangoUser.kids) {
               // Only import active kids
               if (djangoKid.is_active) {
-                // Create kid in our system
-                const kid = await DB.Kids.create({
+                // Create kid in our system using the kid repository
+                await kidRepo.create({
                   name: `${djangoKid.first_name} ${djangoKid.last_name}`.trim(),
                   parent_id: user.id,
                   rfid_token: [], // Empty by default, will be assigned later
                   monthly_spending_limit: 0, // Default, parent will set this
                   is_active: true,
-                }, { transaction });
+                });
 
-                logger.info(`Created kid from Django: ${kid.id} - ${kid.name}`);
+                logger.info(
+                  `Created kid from Django: ${djangoKid.first_name} ${djangoKid.last_name}`,
+                );
               }
             }
-
-            await transaction.commit();
           } catch (kidError) {
-            await transaction.rollback();
-            logger.error(`Failed to create kids from Django: ${kidError instanceof Error ? kidError.message : 'Unknown error'}`);
+            logger.error(
+              `Failed to create kids from Django: ${kidError instanceof Error ? kidError.message : 'Unknown error'}`,
+            );
           }
         }
       } catch (error) {
-        logger.error(`Error fetching user details from Django API: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        logger.error(
+          `Error fetching user details from Django API: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        );
         throw new CustomError(
           'Failed to fetch user details from Django API',
           500,
@@ -330,9 +358,12 @@ export const verifyDjangoTokenService = async (token: string) => {
     };
     return sendSuccess(response, 'Successfully signed in', 200);
   } catch (error) {
+    if (error instanceof CustomError) {
+      throw error;
+    }
     logger.error(
-      `Django token error: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      `Error verifying Django token: ${error instanceof Error ? error.message : 'Unknown error'}`,
     );
-    throw new CustomError('Invalid Django token', 401);
+    throw new CustomError('Invalid token', 401);
   }
 };

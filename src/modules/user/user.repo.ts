@@ -14,6 +14,16 @@ const userRepo = {
       ],
     });
   },
+
+  findByPk: async (userId: string): Promise<UserModel | null> => {
+    return await DB.Users.findByPk(userId);
+  },
+
+  findByRole: async (role: string): Promise<UserModel[]> => {
+    return await DB.Users.findAll({
+      where: { role },
+    });
+  },
 };
 
 export default userRepo;

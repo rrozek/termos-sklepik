@@ -226,6 +226,19 @@ class ProductRepository extends BaseRepository<ProductModel> {
     }
   }
 
+  /**
+   * Find a product by primary key
+   * @param {string} productId - Product ID
+   * @returns {Promise<ProductModel|null>} Product
+   */
+  async findByPk(productId: string): Promise<ProductModel | null> {
+    try {
+      return await DB.Products.findByPk(productId);
+    } catch (error) {
+      throw error;
+    }
+  }
+
   // Helper method to get pagination parameters
   private getPaginationParams(query: any) {
     const page = parseInt(query.page?.toString() || '1', 10);

@@ -1,7 +1,6 @@
 // repositories/BaseRepository.ts
 
-import { DB } from '@/database';
-import { Model, Op, WhereOptions, FindOptions } from 'sequelize';
+import { Model, WhereOptions, FindOptions } from 'sequelize';
 import {
   getPaginationParams,
   buildFilterQuery,
